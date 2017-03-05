@@ -1,3 +1,28 @@
+-- Query for open questions and user metrics
+SELECT TOP 40000
+  PostsWithDeleted.Id AS PostId, 
+  PostsWithDeleted.Score, 
+  PostsWithDeleted.ViewCount, 
+  PostsWithDeleted.Body, 
+  PostsWithDeleted.OwnerUserId, 
+  PostsWithDeleted.Title,
+  PostsWithDeleted.Tags,
+  PostsWithDeleted.AnswerCount,
+  PostsWithDeleted.CommentCount,
+  PostsWithDeleted.FavoriteCount,
+  PostsWithDeleted.AcceptedAnswerId,
+  PostsWithDeleted.CreationDate,
+  PostsWithDeleted.ClosedDate,
+  PostsWithDeleted.DeletionDate,
+  Users.Reputation AS OwnerReputation,
+  Users.UpVotes AS OwnerUpVoteCount
+FROM PostsWithDeleted 
+  join Users on PostsWithDeleted.OwnerUserId = Users.Id
+WHERE  
+  PostsWithDeleted.AcceptedAnswerId IS NOT NULL
+; 
+
+
 -- Query for closed questions and user metrics
 select top 1000
   PostsWithDeleted.Id as PostId, 
