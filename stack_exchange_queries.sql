@@ -1,4 +1,4 @@
--- Query for open questions and user metrics
+-- OPEN QUESTIONS
 SELECT TOP 40000
   PostsWithDeleted.Id AS PostId, 
   PostsWithDeleted.Score, 
@@ -23,9 +23,9 @@ WHERE
 ; 
 
 
--- Query for closed questions and user metrics
-select top 1000
-  PostsWithDeleted.Id as PostId, 
+-- CLOSED QUESTIONS
+SELECT TOP 60000
+  PostsWithDeleted.Id AS PostId, 
   PostsWithDeleted.Score, 
   PostsWithDeleted.ViewCount, 
   PostsWithDeleted.Body, 
@@ -34,19 +34,20 @@ select top 1000
   PostsWithDeleted.Tags,
   PostsWithDeleted.AnswerCount,
   PostsWithDeleted.CommentCount,
+  PostsWithDeleted.FavoriteCount,
+  PostsWithDeleted.AcceptedAnswerId,
   PostsWithDeleted.CreationDate,
-  PostsWithDeleted.DeletionDate,
   PostsWithDeleted.ClosedDate,
-  Users.Reputation,
-  Users.UpVotes,
-  Badges.Class,
+  PostsWithDeleted.DeletionDate,
+  Users.Reputation as OwnerReputation,
+  Users.UpVotes as OwnerUpVoteCount,
   PostHistory.Id,
   PostHistory.Comment,
   CloseReasonTypes.Name,
   CloseReasonTypes.Description
-from PostsWithDeleted 
-  join Users on PostsWithDeleted.OwnerUserId = Users.Id
-  join PostHistory on PostHistory.PostId = PostsWithDeleted.Id
-  join CloseReasonTypes on PostHistory.Comment = CloseReasonTypes.Id
-  join Badges on Users.Id = Badges.UserId
-  where PostHistory.PostHistoryTypeId =10 and (PostHistory.Comment = 101 or PostHistory.Comment = 102 or PostHistory.Comment = 103 or PostHistory.Comment = 104 or PostHistory.Comment = 105);
+FROM PostsWithDeleted 
+  JOIN Users on PostsWithDeleted.OwnerUserId = Users.Id
+  JOIN PostHistory on PostHistory.PostId = PostsWithDeleted.Id
+  JOIN CloseReasonTypes on PostHistory.Comment = CloseReasonTypes.Id
+  WHERE PostHistory.PostHistoryTypeId =10 AND (PostHistory.Comment = 102 OR PostHistory.Comment = 103 OR PostHistory.Comment = 104 OR PostHistory.Comment = 105)
+;
