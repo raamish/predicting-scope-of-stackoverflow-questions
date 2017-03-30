@@ -8,7 +8,7 @@ train_close_file = "closed-questions.csv"
 #Importing Dataset For Open Questions
 dataset_open = pd.read_csv(train_open_file ,header = 0)
 dataset_open['Reason'] = "open"
-dataset_open.drop(['PostId','OwnerUserId','AcceptedAnswerId'], inplace = True, axis = 1, errors='ignore')
+dataset_open.drop(['PostId','OwnerUserId'], inplace = True, axis = 1, errors='ignore')
 
 #Importing Dataset For Closed Questions
 dataset_closed = pd.read_csv(train_close_file, header = 0)
@@ -22,6 +22,9 @@ print "Closed Dataset Overview"
 print dataset_closed.columns.values
 
 #Combining Datasets
-dataset = dataset_open.append(dataset_closed)
-print dataset.head(5)
-print dataset.shape
+combined_dataset = dataset_open.append(dataset_closed)
+
+print combined_dataset.head(5)
+print combined_dataset.shape
+
+combined_dataset.to_csv('combined.csv')
