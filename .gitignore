@@ -1,1 +1,7 @@
 *.csv
+.Rproj.user
+.Rproj
+.RData
+.Rhistory
+.Learners.Rproj
+.~lock.combined.csv#
