@@ -200,7 +200,7 @@ if __name__ == '__main__':
 	metric_entropy()
 	print "done with metric entropy"
 	flesch_score()
-	print "donw with flesch score"
+	print "done with flesch score"
 	print df.columns.values
 	print df.shape
 	exit(1)
