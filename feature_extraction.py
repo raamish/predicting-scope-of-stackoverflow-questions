@@ -7,7 +7,7 @@ import math
 from bs4 import BeautifulSoup
 from nltk.tokenize import RegexpTokenizer, sent_tokenize, \
 word_tokenize
-from nltk.corpus import cmudict 
+from nltk.corpus import cmudict
 from textstat.textstat import textstat
 from collections import defaultdict, deque, Counter
 
@@ -15,11 +15,7 @@ from collections import defaultdict, deque, Counter
 combined_dataset_file = "combined.csv"
 df = pd.read_csv(combined_dataset_file, header =0)
 df.drop(['Unnamed: 0'], inplace = True, axis = 1, errors='ignore')
-
-
-print df.columns.values
-print df.shape
-
+word_dict = cmudict.dict()
 
 def body_word_ari_gunning():
 	"""
@@ -142,15 +138,69 @@ def metric_entropy():
 	df['BodyMetricEntropy'] = randomness_info
 	df.to_csv('combined.csv')
 
+# lambda function to check if the word is valid and is not a punctuation
+not_punctuation = lambda w: not (len(w)==1 and (not w.isalpha()))
+
+# Counting number of syllabels in each word using Carnegie Mellon's Pronouncing Dictionary
+def get_syllabels_count(valid_words):
+	syllabels_count = 0
+	for word in valid_words:
+		try:
+			max_value = 0
+			pronounciations = word_dict[word]
+			for i in pronounciations:
+				value = 0
+				for j in i:
+					if j[-1].isdigit():
+						value+=int(j[-1])
+				if value > max_value:
+					max_value = value
+			syllabels_count += max_value
+		except KeyError:
+			continue
+	return syllabels_count
+
+
+flesch_formula = lambda word_count, sent_count, syllable_count : 206.835 - 1.015*word_count/sent_count - 84.6*syllable_count/word_count		
+
+#Calculating flesch score for readability
+def flesch_score():
+	tokenizer = RegexpTokenizer(r'\w+')
+	final_flesch_score = []
+	valid_words = []
+	for index, row in df.iterrows():
+		body_only = re.sub('<code>[^>]+</code>', '', row['Body'])
+		soup = BeautifulSoup(body_only,"lxml")
+		word_tokens = tokenizer.tokenize(soup.text)
+		for word in word_tokens:
+			if not_punctuation(word):
+				valid_words.append(word)
+		word_count = len(valid_words)
+		tag_removed_text = soup.text
+		tag_removed_text = tag_removed_text.replace("\n","")
+		syllabels_count = get_syllabels_count(valid_words)
+		sentence_token = sent_tokenize(tag_removed_text)
+		sentences_count = len(sentence_token)
+		final_flesch_score.append(flesch_formula(word_count, sentences_count, syllabels_count))
+
+	df['BodyFleschKinkaidGradeLevel'] = final_flesch_score
+	df.to_csv("combined.csv")
+
+
+
+
+
 
 
 
 
 if __name__ == '__main__':
-	#body_word_ari_gunning()
+	body_word_ari_gunning()
 	print "done with basic metrics, gunning fog index and automated reading index"
 	metric_entropy()
-	# flesch_score()
+	print "done with metric entropy"
+	flesch_score()
+	print "donw with flesch score"
 	print df.columns.values
 	print df.shape
 	exit(1)
