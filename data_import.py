@@ -26,5 +26,4 @@ combined_dataset = dataset_open.append(dataset_closed)
 
 print combined_dataset.head(5)
 print combined_dataset.shape
-print "I am a good boy"
 combined_dataset.to_csv('combined.csv')
