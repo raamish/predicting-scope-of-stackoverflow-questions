@@ -12,9 +12,12 @@ from textstat.textstat import textstat
 from collections import defaultdict, deque, Counter
 
 
+# Reading Combined Dataset
 combined_dataset_file = "combined.csv"
 df = pd.read_csv(combined_dataset_file, header =0)
 df.drop(['Unnamed: 0'], inplace = True, axis = 1, errors='ignore')
+
+#Initializing Carneige Mellon's Dictionary
 word_dict = cmudict.dict()
 
 def body_word_ari_gunning():
@@ -110,17 +113,13 @@ def entropy_rate(model, stats):
 		ans = 0
 	return ans
 
-
+#Function to calculate metric entropy
 def metric_entropy():
 	tokenizer = RegexpTokenizer(r'\w+')
 	c = 0
 	randomness_info = []
 	for index, row in df.iterrows():
-		"""
-		use BeautifulSoup to remove tags if required.
-		However Body word count should contain the whole body 
-		including any tags such as <p> and <code>
-		"""
+
 		body_only = re.sub('<code>[^>]+</code>', '', row['Body'])
 		soup = BeautifulSoup(body_only,"lxml")
 		tag_removed_text = soup.text
@@ -160,8 +159,12 @@ def get_syllabels_count(valid_words):
 			continue
 	return syllabels_count
 
-
-flesch_formula = lambda word_count, sent_count, syllable_count : 206.835 - 1.015*word_count/sent_count - 84.6*syllable_count/word_count		
+#Function to calculate Flesch Formula
+def flesch_formula(word_count, sent_count, syllable_count):
+	if sent_count > 0 and word_count > 0:
+		return 206.835 - 1.015*word_count/sent_count - 84.6*syllable_count/word_count
+	else:
+		return 0		
 
 #Calculating flesch score for readability
 def flesch_score():
@@ -187,22 +190,29 @@ def flesch_score():
 	df.to_csv("combined.csv")
 
 
+def assign_0_or_1():
 
+	open_or_closed = []
+	for index, row in df.iterrows():
+		if row['Reason'] == 'open':
+			open_or_closed.append(1)
+		else:
+			open_or_closed.append(0)
+	df['OpenOrClosed'] = open_or_closed
 
+	df.to_csv("combined.csv")
 
 
 
 
 
 if __name__ == '__main__':
-	body_word_ari_gunning()
-	print "done with basic metrics, gunning fog index and automated reading index"
-	metric_entropy()
-	print "done with metric entropy"
-	flesch_score()
-	print "done with flesch score"
+	#body_word_ari_gunning()
+	#metric_entropy()
+	#flesch_score()
+	#assign_0_or_1()
+	print df.head()
 	print df.columns.values
 	print df.shape
-	exit(1)
 
 
