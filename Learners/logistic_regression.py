@@ -63,8 +63,6 @@ def read_data():
 # Main function for Logistic Regression
 if __name__ == '__main__':
 	train, test = read_data()
-	print train.head(5)
-	print test.head(5)
 	y = train['OpenOrClosed']
 	y_test = test['OpenOrClosed']
 	train.drop(['OpenOrClosed'], inplace = True, axis = 1)
@@ -77,14 +75,23 @@ if __name__ == '__main__':
 	
 	weights = weights = logistic_regression(x_answer, y_answer,
                      num_steps = 30000, learning_rate = 5e-5, add_intercept=True)
-	print "first answer:"
+	print "Crude Logistic Regression:"
 	print weights
 
 	#For Validation I am checking whether the weight computed by my code is same as what sklearn optimized version gives me.
 	clf = LogisticRegression(fit_intercept=True, C = 1e15)
 	clf.fit(x_answer, y_answer)
 
-	print "second answer:"
+	print "SkLearn Logistic Regression answer:"
 	print clf.intercept_, clf.coef_
 
-	
+	test_intercept = True
+	#Checking accuracy
+	if test_intercept is True:
+		intercept = np.ones((x_answer_test.shape[0], 1))
+		x_answer_test_final = np.hstack((intercept, x_answer_test))
+	final_scores = np.dot(x_answer_test_final, weights)
+	preds = np.round(sigmoid(final_scores))
+
+	print 'Accuracy from scratch: {0}'.format((preds == y_answer_test).sum().astype(float) / len(preds))
+	print 'Accuracy from sk-learn: {0}'.format(clf.score(x_answer_test, y_answer_test))
