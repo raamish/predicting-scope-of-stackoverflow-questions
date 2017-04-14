@@ -175,6 +175,24 @@ def flesch_grade_score():
 	df.to_csv("combined.csv")
 
 #Calculating flesch score for readability
+def assign_multiple_category():
+	reasons = []
+	for index,row in df.iterrows():
+		if row['Reason'] == "open":
+			reasons.append(0)
+		elif row['Reason'] == "off-topic":
+			reasons.append(1)
+		elif row['Reason'] == "primarily opinion-based":
+			reasons.append(2)
+		elif row['Reason'] == "too broad":
+			reasons.append(3)
+		elif row['Reason'] == "unclear what you're asking":
+			reasons.append(4)
+
+	df['ReasonNumValue'] = reasons
+	df.to_csv("combined.csv")
+
+
 def flesch_reading_ease_score():
 	tokenizer = RegexpTokenizer(r'\w+')
 	final_flesch_reading_ease_score = []

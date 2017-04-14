@@ -87,6 +87,7 @@ if __name__ == '__main__':
 
 	test_intercept = True
 	#Checking accuracy
+	#Here the predictions are made using our code written from scratch
 	if test_intercept is True:
 		intercept = np.ones((x_answer_test.shape[0], 1))
 		x_answer_test_final = np.hstack((intercept, x_answer_test))
