@@ -1,8 +1,9 @@
+import curses
 import math
-import re
 import nltk
+import re
+
 import pandas as pd
-import math
 
 from bs4 import BeautifulSoup
 from nltk.tokenize import RegexpTokenizer, sent_tokenize, \
@@ -140,38 +141,45 @@ def metric_entropy():
 # lambda function to check if the word is valid and is not a punctuation
 not_punctuation = lambda w: not (len(w)==1 and (not w.isalpha()))
 
-# Counting number of syllabels in each word using Carnegie Mellon's Pronouncing Dictionary
-def get_syllabels_count(valid_words):
-	syllabels_count = 0
-	for word in valid_words:
-		try:
-			max_value = 0
-			pronounciations = word_dict[word]
-			for i in pronounciations:
-				value = 0
-				for j in i:
-					if j[-1].isdigit():
-						value+=int(j[-1])
-				if value > max_value:
-					max_value = value
-			syllabels_count += max_value
-		except KeyError:
-			continue
-	return syllabels_count
 
-#Function to calculate Flesch Formula
-def flesch_formula(word_count, sent_count, syllable_count):
-	if sent_count > 0 and word_count > 0:
-		return 206.835 - 1.015*word_count/sent_count - 84.6*syllable_count/word_count
-	else:
-		return 0		
+#Calculating flesch_grade_score for readability
+def flesch_grade_score():
+	df.drop(['BodyFleschKinkaidGradeLevel'], inplace = True, axis = 1, errors='ignore')
+	print df.shape, "dropped a motherfucker"
+	tokenizer = RegexpTokenizer(r'\w+')
+	final_flesch_kincaid_grade_score = []
+	for index, row in df.iterrows():
+		valid_words = []
+		body_only = re.sub('<code>[^>]+</code>', '', row['Body'])
+		soup = BeautifulSoup(body_only,"lxml")
+		word_tokens = tokenizer.tokenize(soup.text)
+		for word in word_tokens:
+			if not_punctuation(word):
+				valid_words.append(word)
+		word_count = len(valid_words)
+		print "word_count of ",index, " - ",word_count
+		tag_removed_text = soup.text
+		tag_removed_text = tag_removed_text.replace("\n","")
+		# syllables_count = get_syllables_count(valid_words)
+		# print "inside flesch for loop - ",index
+		# sentence_token = sent_tokenize(tag_removed_text)
+		# sentences_count = len(sentence_token)
+		if word_count != 0:
+			flesch_kincaid_grade_score = textstat.flesch_kincaid_grade(tag_removed_text)
+		else:
+			flesch_kincaid_grade_score = 0	
+		print "flesch_grade_score of ",index, " - ",flesch_kincaid_grade_score
+		final_flesch_kincaid_grade_score.append(flesch_kincaid_grade_score)
+
+	df['BodyFleschKinkaidGradeLevel'] = final_flesch_kincaid_grade_score
+	df.to_csv("combined.csv")
 
 #Calculating flesch score for readability
-def flesch_score():
+def flesch_reading_ease_score():
 	tokenizer = RegexpTokenizer(r'\w+')
-	final_flesch_score = []
-	valid_words = []
+	final_flesch_reading_ease_score = []
 	for index, row in df.iterrows():
+		valid_words = []
 		body_only = re.sub('<code>[^>]+</code>', '', row['Body'])
 		soup = BeautifulSoup(body_only,"lxml")
 		word_tokens = tokenizer.tokenize(soup.text)
@@ -181,19 +189,22 @@ def flesch_score():
 		word_count = len(valid_words)
 		tag_removed_text = soup.text
 		tag_removed_text = tag_removed_text.replace("\n","")
-		syllabels_count = get_syllabels_count(valid_words)
-		sentence_token = sent_tokenize(tag_removed_text)
-		sentences_count = len(sentence_token)
-		final_flesch_score.append(flesch_formula(word_count, sentences_count, syllabels_count))
+	
+		if word_count != 0:
+			flesch_reading_ease_score = textstat.flesch_reading_ease(tag_removed_text)
+		else:
+			flesch_reading_ease_score = 0
+		print "flesch_reading_ease_score of ",index, " - ",flesch_reading_ease_score
+		final_flesch_reading_ease_score.append(flesch_reading_ease_score)
 
-	df['BodyFleschKinkaidGradeLevel'] = final_flesch_score
+	df['BodyFleschReadingEaseLevel'] = final_flesch_reading_ease_score
 	df.to_csv("combined.csv")
-
 
 def assign_0_or_1():
 
 	open_or_closed = []
 	for index, row in df.iterrows():
+		print index
 		if row['Reason'] == 'open':
 			open_or_closed.append(1)
 		else:
@@ -202,17 +213,14 @@ def assign_0_or_1():
 
 	df.to_csv("combined.csv")
 
-
-
-
-
 if __name__ == '__main__':
 	#body_word_ari_gunning()
 	#metric_entropy()
-	#flesch_score()
-	#assign_0_or_1()
+	# flesch_grade_score()
+	# flesch_reading_ease_score()
+	# assign_0_or_1()
 	print df.head()
 	print df.columns.values
 	print df.shape
-
-
+	
+	#uncomment the function you want to use. 
