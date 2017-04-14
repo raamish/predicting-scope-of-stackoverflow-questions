@@ -45,6 +45,6 @@ if __name__ == '__main__':
 	# y_test_labels[np.arange(len(y_answer_test)), y_answer_test.astype(int)] = 1
 
 	scikit_neural_net(x_answer, y_answer, x_answer_test, y_answer_test)
-
+	print "Neural networks"
 # Accuracy from sk-learn: 0.49955
 
